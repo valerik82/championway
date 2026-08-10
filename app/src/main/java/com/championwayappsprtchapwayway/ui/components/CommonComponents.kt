@@ -20,9 +20,33 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.championwayappsprtchapwayway.ui.theme.ButtonGreen
 import com.championwayappsprtchapwayway.ui.theme.BgCard
 import com.championwayappsprtchapwayway.ui.theme.BgDeep
+import com.championwayappsprtchapwayway.ui.theme.ButtonGreen
+import com.championwayappsprtchapwayway.ui.theme.LoadingBgBottom
+import com.championwayappsprtchapwayway.ui.theme.LoadingBgTop
+import com.championwayappsprtchapwayway.ui.theme.PitchBottom
+import com.championwayappsprtchapwayway.ui.theme.PitchMid
+
+@Composable
+fun LoadingScreenBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = listOf(
+                        LoadingBgTop,
+                        PitchBottom,
+                        PitchMid,
+                        LoadingBgBottom,
+                    ),
+                ),
+            ),
+    ) {
+        content()
+    }
+}
 
 @Composable
 fun AppBackground(modifier: Modifier = Modifier, content: @Composable () -> Unit) {

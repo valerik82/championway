@@ -24,10 +24,6 @@ object OneSignalInApp {
         2_000L,
         5_000L,
         10_000L,
-        20_000L,
-        30_000L,
-        45_000L,
-        60_000L,
     )
 
     @Volatile
@@ -38,6 +34,7 @@ object OneSignalInApp {
 
     private var startupJob: Job? = null
     private var onDismissed: (() -> Unit)? = null
+    private var onContinueWithoutPopup: (() -> Unit)? = null
     private var onFailed: (() -> Unit)? = null
 
     private val lifecycleListener = object : IInAppMessageLifecycleListener {
@@ -75,12 +72,14 @@ object OneSignalInApp {
     fun showStartupMessage(
         hasInternet: () -> Boolean,
         onDismissed: () -> Unit,
+        onContinueWithoutPopup: () -> Unit,
         onFailed: () -> Unit,
     ) {
         startupJob?.cancel()
         startupMessageDisplayed = false
         startupCompleted = false
         this.onDismissed = onDismissed
+        this.onContinueWithoutPopup = onContinueWithoutPopup
         this.onFailed = onFailed
 
         OneSignal.InAppMessages.paused = false
@@ -118,19 +117,30 @@ object OneSignalInApp {
             }
 
             if (!startupMessageDisplayed && !startupCompleted) {
-                Log.w(
+                Log.i(
                     TAG,
-                    "Startup in-app was not shown after ${retryDelaysMs.last()}ms",
+                    "Startup in-app was not shown after ${retryDelaysMs.last()}ms; continuing without popup",
                 )
-                failStartup(onFailed)
+                continueWithoutPopup(onContinueWithoutPopup)
             }
         }
     }
 
     private fun failStartup(onFailed: () -> Unit) {
+        if (startupCompleted) return
+        startupCompleted = true
         startupJob?.cancel()
         OneSignal.InAppMessages.paused = true
         onFailed()
+    }
+
+    private fun continueWithoutPopup(onContinue: () -> Unit) {
+        if (startupCompleted) return
+        startupCompleted = true
+        startupJob?.cancel()
+        OneSignal.InAppMessages.paused = true
+        OneSignalPush.requestPushPermission()
+        onContinue()
     }
 
     private fun fireStartupTrigger() {

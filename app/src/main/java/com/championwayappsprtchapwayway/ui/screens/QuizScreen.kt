@@ -36,6 +36,7 @@ import com.championwayappsprtchapwayway.ui.theme.BgDeep
 import com.championwayappsprtchapwayway.ui.theme.BgElevated
 import com.championwayappsprtchapwayway.ui.theme.Correct
 import com.championwayappsprtchapwayway.ui.theme.TextMuted
+import com.championwayappsprtchapwayway.ui.theme.TextPrimary
 import com.championwayappsprtchapwayway.ui.theme.Wrong
 
 @Composable
@@ -129,6 +130,7 @@ fun QuizScreen(
                 text = question.text,
                 style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.SemiBold,
+                color = TextPrimary,
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -215,7 +217,7 @@ private fun ChoiceButton(
         Text(
             text = text,
             style = MaterialTheme.typography.bodyLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = alpha),
+            color = TextPrimary.copy(alpha = alpha),
         )
     }
 }

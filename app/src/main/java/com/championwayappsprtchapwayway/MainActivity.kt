@@ -41,26 +41,27 @@ class MainActivity : ComponentActivity() {
                     OneSignalInApp.showStartupMessage(
                         hasInternet = { NetworkUtils.hasInternetConnection(this@MainActivity) },
                         onDismissed = { startupState = StartupState.Ready },
+                        onContinueWithoutPopup = { startupState = StartupState.Ready },
                         onFailed = { startupState = StartupState.ConnectionError },
                     )
                 }
 
-                AppBackground {
-                    when (startupState) {
-                        StartupState.Loading -> {
-                            SplashScreen(
-                                onFinished = {
-                                    startupState = StartupState.WaitingForPopup
-                                    beginStartupPopup()
-                                },
-                            )
-                        }
+                when (startupState) {
+                    StartupState.Loading -> {
+                        SplashScreen(
+                            onFinished = {
+                                startupState = StartupState.WaitingForPopup
+                                beginStartupPopup()
+                            },
+                        )
+                    }
 
-                        StartupState.WaitingForPopup -> {
-                            StartupWaitingScreen(modifier = Modifier.fillMaxSize())
-                        }
+                    StartupState.WaitingForPopup -> {
+                        StartupWaitingScreen(modifier = Modifier.fillMaxSize())
+                    }
 
-                        StartupState.ConnectionError -> {
+                    StartupState.ConnectionError -> {
+                        AppBackground {
                             ConnectionErrorScreen(
                                 onRetry = {
                                     startupState = StartupState.WaitingForPopup
@@ -68,8 +69,10 @@ class MainActivity : ComponentActivity() {
                                 },
                             )
                         }
+                    }
 
-                        StartupState.Ready -> {
+                    StartupState.Ready -> {
+                        AppBackground {
                             when (screen) {
                                 AppScreen.Game -> PenaltyGameScreen(
                                     modifier = Modifier.fillMaxSize(),

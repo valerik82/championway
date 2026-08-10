@@ -1,4 +1,4 @@
-name: Build Release AAB
+name: Build Release APK and AAB
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-aab:
+  build-release:
     runs-on: ubuntu-latest
 
     steps:
@@ -38,7 +38,7 @@ jobs:
             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "${{ github.workspace }}/release.keystore"
           fi
 
-      - name: Build release AAB
+      - name: Build release APK and AAB
         env:
           RELEASE_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           RELEASE_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
@@ -47,7 +47,14 @@ jobs:
           if [ -f release.keystore ]; then
             export RELEASE_KEYSTORE_PATH="${{ github.workspace }}/release.keystore"
           fi
-          ./gradlew bundleRelease --stacktrace
+          ./gradlew assembleRelease bundleRelease --stacktrace
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: championway-release-apk
+          path: app/build/outputs/apk/release/*.apk
+          if-no-files-found: error
 
       - name: Upload AAB artifact
         uses: actions/upload-artifact@v4
