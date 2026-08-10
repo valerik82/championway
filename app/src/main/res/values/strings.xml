@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">ChampionWay</string>
+    <string name="onesignal_app_id" translatable="false">32004316-9272-4a26-b978-745936045a98</string>
+    <string name="onesignal_startup_trigger_key" translatable="false">app_loaded</string>
+    <string name="onesignal_startup_trigger_value" translatable="false">true</string>
+    <string name="startup_waiting_message">Loading content…</string>
+    <string name="connection_error_title">Connection problem</string>
+    <string name="connection_error_message">Unable to load content. Please check your internet connection and try again.</string>
+    <string name="connection_error_retry">Try again</string>
+</resources>

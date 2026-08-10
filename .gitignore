@@ -1,0 +1,29 @@
+*.iml
+.gradle/
+/local.properties
+/.idea/
+.DS_Store
+/build/
+/app/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+*.apk
+*.ap_
+*.aab
+
+# Android Studio
+*.hprof
+.navigation/
+
+# Kotlin
+*.kotlin_module
+
+# Secrets
+*service-account*.json
+*firebase-adminsdk*.json
+*.jks
+*.keystore
+
+# OS
+Thumbs.db

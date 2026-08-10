@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "676247268365",
+    "project_id": "championway-dad44",
+    "storage_bucket": "championway-dad44.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:676247268365:android:0ce2a47ee409291ab53944",
+        "android_client_info": {
+          "package_name": "com.championwayappsprtchapwayway"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDAwtrW5CTAzSnbS3e9g_1N5z5yv5HCvZs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

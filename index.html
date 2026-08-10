@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0b0b0f" />
+  <title></title>
+  <style>
+    :root {
+      --bg-deep: #07070a;
+      --bg-card: #0f1016;
+      --bg-elevated: #171823;
+      --accent: #ff2d2d;
+      --accent-soft: rgba(255, 45, 45, 0.14);
+      --accent-glow: rgba(255, 45, 45, 0.38);
+      --text: #f2f2f6;
+      --text-muted: #a4a6b3;
+      --correct: #3dd68c;
+      --wrong: #ff2d2d;
+      --radius: 14px;
+      --font: "Segoe UI", system-ui, -apple-system, sans-serif;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+
+    html {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      font-family: var(--font);
+      background: radial-gradient(ellipse 120% 80% at 50% -20%, rgba(255, 45, 45, 0.22) 0%, transparent 55%),
+        linear-gradient(180deg, var(--bg-deep) 0%, #050509 100%);
+      color: var(--text);
+      padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+        max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    }
+
+    .app {
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border-radius: var(--radius);
+      border: 1px solid rgba(255, 45, 45, 0.16);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.03) inset;
+      padding: 1.25rem 1.15rem;
+    }
+
+    @media (min-width: 480px) {
+      .card {
+        padding: 1.5rem 1.35rem;
+      }
+    }
+
+    .progress-wrap {
+      margin-bottom: 1rem;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.45rem;
+    }
+
+    .progress-meta span strong {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: var(--bg-elevated);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--accent), #ff6a6a);
+      border-radius: 999px;
+      transition: width 0.35s ease;
+    }
+
+    .question-text {
+      font-size: clamp(1rem, 3.8vw, 1.12rem);
+      line-height: 1.45;
+      margin: 0 0 1.1rem;
+      font-weight: 600;
+    }
+
+    .choices {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .choice {
+      display: block;
+      width: 100%;
+      text-align: left;
+      padding: 0.9rem 1rem;
+      font-size: 0.95rem;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--bg-elevated);
+      border: 2px solid transparent;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      min-height: 48px;
+    }
+
+    .choice:hover:not(:disabled) {
+      border-color: rgba(255, 45, 45, 0.55);
+      background: var(--accent-soft);
+    }
+
+    .choice:active:not(:disabled) {
+      transform: scale(0.99);
+    }
+
+    .choice:disabled {
+      cursor: default;
+      opacity: 0.95;
+    }
+
+    .choice.correct {
+      border-color: var(--correct);
+      background: rgba(61, 214, 140, 0.12);
+    }
+
+    .choice.wrong {
+      border-color: var(--wrong);
+      background: rgba(255, 92, 92, 0.1);
+    }
+
+    .choice.reveal:not(.correct):not(.wrong) {
+      opacity: 0.55;
+    }
+
+    .actions {
+      margin-top: 1.15rem;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn-primary {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #0a1628;
+      background: linear-gradient(135deg, var(--accent), #ff5a5a);
+      border: none;
+      padding: 0.75rem 1.35rem;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px var(--accent-glow);
+      min-height: 48px;
+      min-width: 120px;
+      transition: transform 0.15s, box-shadow 0.2s;
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 28px var(--accent-glow);
+    }
+
+    .btn-primary:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-primary.hidden {
+      display: none;
+    }
+
+    #screen-start .card,
+    #screen-result .card {
+      text-align: center;
+    }
+
+    .home-hero {
+      margin: -1.25rem -1.15rem 1.1rem;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      border-radius: 13px 13px 0 0;
+      background: var(--bg-elevated);
+      border-bottom: 1px solid rgba(255, 45, 45, 0.22);
+    }
+
+    @media (min-width: 480px) {
+      .home-hero {
+        margin: -1.5rem -1.35rem 1.2rem;
+      }
+    }
+
+    .home-hero img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+    }
+
+    #screen-start p {
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin: 0 0 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .result-score {
+      font-size: clamp(2.5rem, 12vw, 3.5rem);
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1;
+      margin: 0.5rem 0;
+    }
+
+    .result-label {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .start-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.65rem;
+    }
+
+    .btn-secondary {
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--accent);
+      background: transparent;
+      border: 2px solid var(--accent);
+      padding: 0.75rem 1.35rem;
+      border-radius: 10px;
+      cursor: pointer;
+      min-height: 48px;
+      width: 100%;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+    }
+
+    .btn-secondary:hover {
+      background: var(--accent-soft);
+    }
+
+    .btn-secondary:active {
+      transform: scale(0.99);
+    }
+
+    .btn-ghost {
+      margin-top: 0.5rem;
+      width: 100%;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.55rem;
+      font-family: inherit;
+    }
+
+    .btn-ghost:hover {
+      color: var(--text);
+    }
+
+    .game-hud {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .game-hud strong {
+      color: var(--accent);
+    }
+
+    .pitch-wrap {
+      position: relative;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.4);
+    }
+
+    .pitch {
+      position: relative;
+      height: clamp(200px, 48vw, 240px);
+      background: linear-gradient(180deg, #1e5c38 0%, #124528 45%, #0d3a22 100%);
+    }
+
+    .pitch::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 18px,
+        rgba(255, 255, 255, 0.03) 18px,
+        rgba(255, 255, 255, 0.03) 20px
+      );
+      pointer-events: none;
+    }
+
+    .goal-box {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(90%, 300px);
+      height: 118px;
+    }
+
+    .goal-zones {
+      display: flex;
+      height: 86px;
+      border: 3px solid rgba(255, 255, 255, 0.9);
+      border-bottom: none;
+      border-radius: 10px 10px 0 0;
+      background: rgba(10, 22, 40, 0.35);
+      overflow: hidden;
+    }
+
+    .zone-btn {
+      flex: 1;
+      border: none;
+      border-right: 1px solid rgba(255, 255, 255, 0.18);
+      background: rgba(255, 255, 255, 0.05);
+      color: rgba(255, 255, 255, 0.45);
+      font-size: 0.68rem;
+      font-weight: 700;
+      font-family: inherit;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      min-height: 48px;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .zone-btn:last-child {
+      border-right: none;
+    }
+
+    .zone-btn:hover:not(:disabled) {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .zone-btn:disabled {
+      cursor: default;
+      opacity: 0.55;
+    }
+
+    .keeper {
+      position: absolute;
+      left: 50%;
+      bottom: 48px;
+      width: 34px;
+      height: 42px;
+      margin-left: -17px;
+      background: linear-gradient(180deg, #ff6a6a 0%, var(--accent) 100%);
+      border-radius: 8px 8px 5px 5px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+      transition: transform 0.48s cubic-bezier(0.34, 1.15, 0.64, 1);
+      z-index: 1;
+    }
+
+    .keeper::before {
+      content: "";
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 20px;
+      height: 16px;
+      background: #0a1628;
+      border-radius: 4px;
+    }
+
+    .keeper.pos-0 {
+      transform: translateX(-74px);
+    }
+
+    .keeper.pos-1 {
+      transform: translateX(0);
+    }
+
+    .keeper.pos-2 {
+      transform: translateX(74px);
+    }
+
+    .ball {
+      position: absolute;
+      bottom: 14px;
+      left: 50%;
+      width: 26px;
+      height: 26px;
+      margin-left: -13px;
+      background: radial-gradient(circle at 32% 28%, #ffffff, #c5c5c5);
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      transition: transform 0.52s cubic-bezier(0.25, 0.85, 0.2, 1), opacity 0.35s;
+      z-index: 2;
+    }
+
+    .ball.shoot-0 {
+      transform: translate(-70px, -138px) scale(0.88);
+    }
+
+    .ball.shoot-1 {
+      transform: translate(0, -152px) scale(0.88);
+    }
+
+    .ball.shoot-2 {
+      transform: translate(70px, -138px) scale(0.88);
+    }
+
+    .ball.saved {
+      opacity: 0.35;
+    }
+
+    .game-msg {
+      text-align: center;
+      margin: 0.85rem 0 0;
+      min-height: 1.35em;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .game-msg.goal-flash {
+      color: var(--correct);
+    }
+
+    .game-msg.save-flash {
+      color: var(--wrong);
+    }
+
+    .game-end-panel {
+      text-align: center;
+    }
+
+    .game-end-panel .result-score {
+      margin: 0.35rem 0 0.25rem;
+    }
+
+    .game-end-panel .btn-secondary {
+      margin-top: 0.5rem;
+    }
+
+    .splash {
+      position: fixed;
+      inset: 0;
+      z-index: 10000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom)
+        env(safe-area-inset-left);
+      background: radial-gradient(ellipse 80% 60% at 50% 30%, rgba(255, 45, 45, 0.22) 0%, transparent 55%),
+        linear-gradient(180deg, #020203 0%, var(--bg-deep) 45%, #07070c 100%);
+      transition: opacity 0.55s ease, visibility 0.55s ease;
+    }
+
+    .splash.is-done {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .splash-ball-wrap {
+      position: relative;
+      width: 104px;
+      height: 104px;
+      flex-shrink: 0;
+      filter: drop-shadow(0 12px 36px rgba(255, 45, 45, 0.5));
+      animation: splash-ball-appear 0.45s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
+      opacity: 0;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+
+    @keyframes splash-ball-appear {
+      from {
+        opacity: 0;
+        transform: scale(0.88);
+      }
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .splash-ball-spin {
+      width: 100%;
+      height: 100%;
+      animation: splash-ball-rotate 1.65s linear infinite;
+      will-change: transform;
+      backface-visibility: hidden;
+    }
+
+    @keyframes splash-ball-rotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .splash-ball-img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .splash-glow {
+      position: absolute;
+      width: 120px;
+      height: 40px;
+      left: 50%;
+      bottom: 18%;
+      transform: translate3d(-50%, 0, 0);
+      background: radial-gradient(ellipse, rgba(255, 45, 45, 0.35) 0%, transparent 70%);
+      animation: splash-glow-pulse 1.6s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite alternate;
+    }
+
+    @keyframes splash-glow-pulse {
+      from {
+        opacity: 0.45;
+        transform: translate3d(-50%, 0, 0) scale(0.92);
+      }
+      to {
+        opacity: 0.88;
+        transform: translate3d(-50%, 0, 0) scale(1.06);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .splash-ball-wrap {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+
+      .splash-ball-spin {
+        animation: none;
+      }
+
+      .splash-glow {
+        animation: none;
+        opacity: 0.6;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="splash" class="splash" aria-hidden="true">
+    <div class="splash-glow" aria-hidden="true"></div>
+    <div class="splash-ball-wrap">
+      <div class="splash-ball-spin">
+        <img
+          class="splash-ball-img"
+          src="ball.png"
+          width="104"
+          height="104"
+          alt=""
+          decoding="async"
+          fetchpriority="high"
+          draggable="false"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="app">
+    <main>
+      <section id="screen-start" class="card">
+        <div class="home-hero">
+          <img
+            src="https://images.unsplash.com/photo-1574629810360-7efbbe195018?auto=format&amp;fit=crop&amp;w=900&amp;h=506&amp;q=80"
+            alt="Soccer ball on a green pitch in a stadium"
+            width="900"
+            height="506"
+            loading="eager"
+            decoding="async"
+            fetchpriority="high"
+          />
+        </div>
+        <p>Test your knowledge across football, basketball, tennis, Olympics, and more. Each question has one correct answer.</p>
+        <div class="start-actions">
+          <button type="button" class="btn-primary" id="btn-start" style="width: 100%">Start quiz</button>
+          <button type="button" class="btn-secondary" id="btn-open-game">Penalty kicks</button>
+        </div>
+      </section>
+
+      <section id="screen-quiz" class="hidden">
+        <div class="card">
+          <div class="progress-wrap">
+            <div class="progress-meta">
+              <span>Question <strong id="q-num">1</strong> / 15</span>
+              <span>Score: <strong id="score">0</strong></span>
+            </div>
+            <div class="progress-bar" aria-hidden="true">
+              <div class="progress-fill" id="progress-fill"></div>
+            </div>
+          </div>
+          <p class="question-text" id="question-text"></p>
+          <div class="choices" id="choices" role="group" aria-label="Answer choices"></div>
+          <div class="actions">
+            <button type="button" class="btn-primary hidden" id="btn-next">Next</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="screen-result" class="hidden">
+        <div class="card">
+          <p class="result-label">You scored</p>
+          <div class="result-score" id="final-score">0</div>
+          <p class="result-label" id="result-message"></p>
+          <button type="button" class="btn-primary" id="btn-retry" style="width: 100%">Play again</button>
+        </div>
+      </section>
+
+      <section id="screen-game" class="hidden">
+        <div class="card">
+          <div id="game-active">
+            <div class="game-hud">
+              <span>Shot <strong id="game-shot">1</strong> / 5</span>
+              <span>Goals: <strong id="game-goals">0</strong></span>
+            </div>
+            <div class="pitch-wrap">
+              <div class="pitch" aria-hidden="true">
+                <div class="goal-box">
+                  <div class="goal-zones" role="group" aria-label="Aim left, center, or right">
+                    <button type="button" class="zone-btn" data-dir="0" aria-label="Shoot left">LEFT</button>
+                    <button type="button" class="zone-btn" data-dir="1" aria-label="Shoot center">MID</button>
+                    <button type="button" class="zone-btn" data-dir="2" aria-label="Shoot right">RIGHT</button>
+                  </div>
+                  <div class="keeper pos-1" id="keeper"></div>
+                </div>
+                <div class="ball" id="game-ball"></div>
+              </div>
+            </div>
+            <p class="game-msg" id="game-msg" aria-live="polite">Tap a zone to shoot</p>
+            <button type="button" class="btn-ghost" id="btn-game-back">← Back to menu</button>
+          </div>
+          <div id="game-end" class="hidden game-end-panel">
+            <p class="result-label">Penalty shootout</p>
+            <div class="result-score" id="game-final-goals">0</div>
+            <p class="result-label" id="game-end-detail">goals from 5 shots</p>
+            <button type="button" class="btn-primary" id="btn-game-again" style="width: 100%">Play again</button>
+            <button type="button" class="btn-secondary" id="btn-game-home">Home</button>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function initSplash() {
+      const splash = document.getElementById("splash");
+      if (!splash) return;
+      const reduceMotion =
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      let dismissed = false;
+
+      function removeSplash() {
+        if (dismissed) return;
+        dismissed = true;
+        splash.classList.add("is-done");
+        window.setTimeout(function () {
+          if (splash.parentNode) splash.remove();
+        }, 600);
+      }
+
+      if (reduceMotion) {
+        window.setTimeout(removeSplash, 500);
+        return;
+      }
+      window.setTimeout(removeSplash, 2400);
+    })();
+
+    const QUESTIONS = [
+      {
+        q: "How long is a standard NBA quarter (regulation time)?",
+        choices: ["10 minutes", "12 minutes", "15 minutes", "20 minutes"],
+        answer: 1,
+      },
+      {
+        q: "In association football (soccer), what is the maximum number of outfield players one team can have on the pitch?",
+        choices: ["9", "10", "11", "12"],
+        answer: 1,
+      },
+      {
+        q: "The Olympic rings represent five continents. Which color is NOT one of the ring colors?",
+        choices: ["Black", "Green", "Orange", "Yellow"],
+        answer: 2,
+      },
+      {
+        q: "In tennis, what is the term for a score of zero?",
+        choices: ["Nil", "Love", "Blank", "Zero"],
+        answer: 1,
+      },
+      {
+        q: "How many players are on the field for one American football team during a play?",
+        choices: ["9", "10", "11", "12"],
+        answer: 2,
+      },
+      {
+        q: "Which country has won the most FIFA Men's World Cup titles as of common records?",
+        choices: ["Germany", "Argentina", "Italy", "Brazil"],
+        answer: 3,
+      },
+      {
+        q: "What distance is a marathon race (approximately)?",
+        choices: ["40.2 km", "42.195 km", "45 km", "50 km"],
+        answer: 1,
+      },
+      {
+        q: "In baseball, how many strikes result in a strikeout?",
+        choices: ["2", "3", "4", "5"],
+        answer: 1,
+      },
+      {
+        q: "The Stanley Cup is awarded in which sport?",
+        choices: ["Basketball", "Ice hockey", "Lacrosse", "Field hockey"],
+        answer: 1,
+      },
+      {
+        q: "In volleyball, how many hits is a team normally allowed before sending the ball over the net?",
+        choices: ["2", "3", "4", "Unlimited"],
+        answer: 1,
+      },
+      {
+        q: "Which sport uses the terms 'birdie' and 'eagle'?",
+        choices: ["Tennis", "Cricket", "Golf", "Badminton"],
+        answer: 2,
+      },
+      {
+        q: "How many periods are played in a standard NHL regulation game?",
+        choices: ["2", "3", "4", "5"],
+        answer: 1,
+      },
+      {
+        q: "In cricket, what is a score of six runs from one ball usually called?",
+        choices: ["A boundary", "A six", "A maximum over", "A ton"],
+        answer: 1,
+      },
+      {
+        q: "The Tour de France is primarily which type of event?",
+        choices: ["Marathon running", "Road cycling", "Triathlon", "Motor racing"],
+        answer: 1,
+      },
+      {
+        q: "In rugby union, what is the value of a successful try (before any conversion)?",
+        choices: ["3 points", "4 points", "5 points", "7 points"],
+        answer: 2,
+      },
+    ];
+
+    const el = {
+      start: document.getElementById("screen-start"),
+      quiz: document.getElementById("screen-quiz"),
+      result: document.getElementById("screen-result"),
+      game: document.getElementById("screen-game"),
+      btnStart: document.getElementById("btn-start"),
+      btnOpenGame: document.getElementById("btn-open-game"),
+      btnNext: document.getElementById("btn-next"),
+      btnRetry: document.getElementById("btn-retry"),
+      qNum: document.getElementById("q-num"),
+      score: document.getElementById("score"),
+      progressFill: document.getElementById("progress-fill"),
+      questionText: document.getElementById("question-text"),
+      choices: document.getElementById("choices"),
+      finalScore: document.getElementById("final-score"),
+      resultMessage: document.getElementById("result-message"),
+      gameActive: document.getElementById("game-active"),
+      gameEnd: document.getElementById("game-end"),
+      gameShot: document.getElementById("game-shot"),
+      gameGoals: document.getElementById("game-goals"),
+      gameMsg: document.getElementById("game-msg"),
+      gameBall: document.getElementById("game-ball"),
+      keeper: document.getElementById("keeper"),
+      gameFinalGoals: document.getElementById("game-final-goals"),
+      gameEndDetail: document.getElementById("game-end-detail"),
+      btnGameBack: document.getElementById("btn-game-back"),
+      btnGameAgain: document.getElementById("btn-game-again"),
+      btnGameHome: document.getElementById("btn-game-home"),
+    };
+
+    const zoneBtns = () => document.querySelectorAll("#screen-game .zone-btn");
+
+    const PENALTY_ROUNDS = 5;
+    let gameRound = 0;
+    let gameGoals = 0;
+    let gameBusy = false;
+    let gameGen = 0;
+
+    let index = 0;
+    let score = 0;
+    let answered = false;
+
+    function showScreen(which) {
+      el.start.classList.toggle("hidden", which !== "start");
+      el.quiz.classList.toggle("hidden", which !== "quiz");
+      el.result.classList.toggle("hidden", which !== "result");
+      el.game.classList.toggle("hidden", which !== "game");
+    }
+
+    function updateGameHud() {
+      el.gameShot.textContent = String(Math.min(gameRound + 1, PENALTY_ROUNDS));
+      el.gameGoals.textContent = String(gameGoals);
+    }
+
+    function resetPenaltyVisuals() {
+      el.gameBall.classList.remove("shoot-0", "shoot-1", "shoot-2", "saved");
+      el.gameBall.style.transition = "none";
+      void el.gameBall.offsetWidth;
+      el.gameBall.style.transition = "";
+      el.keeper.className = "keeper pos-1";
+    }
+
+    function setZonesDisabled(disabled) {
+      zoneBtns().forEach((b) => {
+        b.disabled = disabled;
+      });
+    }
+
+    function showPenaltyPlaying() {
+      el.gameActive.classList.remove("hidden");
+      el.gameEnd.classList.add("hidden");
+    }
+
+    function showPenaltyEnd() {
+      el.gameActive.classList.add("hidden");
+      el.gameEnd.classList.remove("hidden");
+      el.gameFinalGoals.textContent = String(gameGoals);
+      el.gameEndDetail.textContent =
+        gameGoals === PENALTY_ROUNDS
+          ? "Perfect — all five found the net!"
+          : gameGoals + " goal" + (gameGoals === 1 ? "" : "s") + " from " + PENALTY_ROUNDS + " shots";
+    }
+
+    function startPenaltyGame() {
+      gameGen += 1;
+      gameRound = 0;
+      gameGoals = 0;
+      gameBusy = false;
+      showPenaltyPlaying();
+      resetPenaltyVisuals();
+      setZonesDisabled(false);
+      el.gameMsg.textContent = "Tap a zone to shoot";
+      el.gameMsg.classList.remove("goal-flash", "save-flash");
+      updateGameHud();
+    }
+
+    function endPenaltyGame() {
+      gameBusy = true;
+      setZonesDisabled(true);
+      showPenaltyEnd();
+    }
+
+    function onZoneShoot(dir) {
+      if (gameBusy || gameRound >= PENALTY_ROUNDS) return;
+      const gen = gameGen;
+      gameBusy = true;
+      setZonesDisabled(true);
+      el.gameMsg.classList.remove("goal-flash", "save-flash");
+
+      const keeperDir = Math.floor(Math.random() * 3);
+      el.keeper.className = "keeper pos-" + keeperDir;
+      el.gameBall.classList.remove("shoot-0", "shoot-1", "shoot-2", "saved");
+      void el.gameBall.offsetWidth;
+      el.gameBall.classList.add("shoot-" + dir);
+
+      const saved = keeperDir === dir;
+      if (saved) el.gameBall.classList.add("saved");
+
+      window.setTimeout(() => {
+        if (gen !== gameGen) return;
+        el.gameMsg.textContent = saved ? "Saved!" : "Goal!";
+        el.gameMsg.classList.add(saved ? "save-flash" : "goal-flash");
+        if (!saved) gameGoals += 1;
+        gameRound += 1;
+        updateGameHud();
+
+        window.setTimeout(() => {
+          if (gen !== gameGen) return;
+          if (gameRound >= PENALTY_ROUNDS) {
+            endPenaltyGame();
+            return;
+          }
+          resetPenaltyVisuals();
+          el.gameMsg.textContent = "Tap a zone to shoot";
+          el.gameMsg.classList.remove("goal-flash", "save-flash");
+          gameBusy = false;
+          setZonesDisabled(false);
+        }, 650);
+      }, 520);
+    }
+
+    function setProgress() {
+      const pct = ((index + (answered ? 1 : 0)) / QUESTIONS.length) * 100;
+      el.progressFill.style.width = Math.min(100, Math.max(0, pct)) + "%";
+    }
+
+    function renderQuestion() {
+      answered = false;
+      const q = QUESTIONS[index];
+      el.qNum.textContent = String(index + 1);
+      el.score.textContent = String(score);
+      el.questionText.textContent = q.q;
+      el.choices.innerHTML = "";
+      el.btnNext.classList.add("hidden");
+      el.btnNext.disabled = true;
+
+      q.choices.forEach((text, i) => {
+        const b = document.createElement("button");
+        b.type = "button";
+        b.className = "choice";
+        b.textContent = text;
+        b.dataset.index = String(i);
+        b.addEventListener("click", () => onPick(i));
+        el.choices.appendChild(b);
+      });
+      setProgress();
+    }
+
+    function onPick(i) {
+      if (answered) return;
+      answered = true;
+      const q = QUESTIONS[index];
+      const correct = q.answer;
+      const buttons = el.choices.querySelectorAll(".choice");
+      buttons.forEach((btn, j) => {
+        btn.disabled = true;
+        btn.classList.add("reveal");
+        if (j === correct) btn.classList.add("correct");
+        else if (j === i && i !== correct) btn.classList.add("wrong");
+      });
+      if (i === correct) score += 1;
+      el.score.textContent = String(score);
+      el.btnNext.classList.remove("hidden");
+      el.btnNext.disabled = false;
+      setProgress();
+    }
+
+    function next() {
+      index += 1;
+      if (index >= QUESTIONS.length) {
+        finish();
+        return;
+      }
+      renderQuestion();
+    }
+
+    function finish() {
+      el.finalScore.textContent = String(score);
+      const total = QUESTIONS.length;
+      let msg = "";
+      if (score === total) msg = "Perfect! You're a sports encyclopedia.";
+      else if (score >= 12) msg = "Excellent — serious fan territory.";
+      else if (score >= 8) msg = "Solid game — keep watching and learning.";
+      else msg = "Room to grow — that's what trivia is for.";
+      el.resultMessage.textContent = msg + " (" + score + " / " + total + ")";
+      showScreen("result");
+    }
+
+    function reset() {
+      index = 0;
+      score = 0;
+      showScreen("quiz");
+      renderQuestion();
+    }
+
+    el.btnStart.addEventListener("click", () => {
+      reset();
+    });
+
+    el.btnOpenGame.addEventListener("click", () => {
+      showScreen("game");
+      startPenaltyGame();
+    });
+
+    zoneBtns().forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const d = parseInt(btn.getAttribute("data-dir"), 10);
+        if (!Number.isNaN(d)) onZoneShoot(d);
+      });
+    });
+
+    el.btnGameBack.addEventListener("click", () => {
+      gameGen += 1;
+      gameBusy = false;
+      showScreen("start");
+    });
+
+    el.btnGameAgain.addEventListener("click", () => {
+      startPenaltyGame();
+    });
+
+    el.btnGameHome.addEventListener("click", () => {
+      showScreen("start");
+    });
+
+    el.btnNext.addEventListener("click", next);
+
+    el.btnRetry.addEventListener("click", () => {
+      showScreen("start");
+    });
+  </script>
+</body>
+</html>
