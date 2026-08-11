@@ -69,8 +69,7 @@ jobs:
         run: |
           AAB=$(ls app/build/outputs/bundle/release/*.aab)
           jarsigner -verify -verbose "$AAB"
-          unzip -p "$AAB" META-INF/*.RSA 2>/dev/null | keytool -printcert | tee /tmp/aab-cert.txt
-          grep -q "Signed by" /tmp/aab-cert.txt
+          unzip -p "$AAB" META-INF/*.RSA | keytool -printcert | grep -q "Owner:"
 
       - name: Upload signed production AAB
         uses: actions/upload-artifact@v4
